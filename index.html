@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta http-equiv="refresh" content="60">
+<script>
+(function(){
+  if(!location.search.includes('v=')){location.replace(location.pathname+'?v='+Date.now());return;}
+  setTimeout(function(){location.replace(location.pathname+'?v='+Date.now());},60000);
+})();
+</script>
 <title>CVM OPS</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -89,7 +94,7 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 <body>
 <div class="hdr">
   <div class="hdr-l"><div class="title">CVM OPS</div><div class="date">MARDI 12 MAI 2026</div></div>
-  <div class="hdr-r">MAJ 15:25:54<br><span id="clk"></span></div>
+  <div class="hdr-r">MAJ 15:26:22<br><span id="clk"></span></div>
 </div>
 <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
 
