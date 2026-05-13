@@ -1,4 +1,214 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8">
-<meta http-equiv="refresh" content="120">
-<style>*{margin:0;padding:0}html,body{width:100%;height:100%;background:#000;overflow:hidden}</style>
-</head><body></body></html>
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CVM OPS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--sb:#0d1117;--sb2:#0d1520;--sb3:#1a2a4a;--st:#e0e0e0;--st2:#7fb3d3;--sa:#4a90d9;--sbr:#1a2a4a;--sbr2:rgba(255,255,255,0.07);--sz:#c0d8e8;--hbg:linear-gradient(135deg,#1a2a4a,#2c3e6a);--htitle:#e8f4ff;--hbd:#4a90d9}
+[data-theme="light"]{--sb:#dce8f5;--sb2:#c4d6ec;--sb3:#9ab4d0;--st:#0c1828;--st2:#2a4060;--sa:#1460a8;--sbr:#7a98b8;--sbr2:rgba(0,0,0,0.09);--sz:#1a3050;--hbg:linear-gradient(135deg,#1460a8,#1a80d9);--htitle:#ffffff;--hbd:#5aacff}
+body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:var(--hbg);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--hbd);flex-shrink:0}
+.hdr-l .title{font-size:56px;font-weight:900;letter-spacing:6px;color:var(--htitle)}
+.hdr-l .date{font-size:28px;color:var(--htitle);opacity:.8;margin-top:6px;letter-spacing:2px}
+.hdr-r{font-size:32px;color:var(--htitle);opacity:.8;text-align:right;line-height:1.6}
+.dots{height:8px;background:var(--sb);display:flex;gap:3px;padding:0 3px;flex-shrink:0}
+.dot{flex:1;border-radius:2px;background:var(--sb3);transition:background .3s}
+.dot.on{background:var(--sa)}
+.slide{flex:1;overflow:hidden;display:none;flex-direction:column}
+.slide.on{display:flex}
+.stitle{padding:6px 20px;font-size:20px;font-weight:900;letter-spacing:3px;color:var(--sa);background:var(--sb2);border-bottom:2px solid var(--sbr);flex-shrink:0}
+.tl-axis{position:relative;height:34px;background:var(--sb2);margin-left:120px;flex-shrink:0;border-bottom:1px solid var(--sbr)}
+.th{position:absolute;font-size:16px;color:var(--sa);transform:translateX(-50%);top:7px;font-weight:700}
+.tl-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;display:flex;flex-direction:column}
+.tl-zones{overflow:auto}
+.tl-zones-inner{min-width:800px;display:flex;flex-direction:column;flex:1;position:relative}
+.tl-zone-hdr{position:sticky;top:0;z-index:3;display:flex;background:var(--sb2);border-bottom:1px solid var(--sbr);flex-shrink:0;height:34px}
+.tl-zone-corner{width:120px;min-width:120px;flex-shrink:0;position:sticky;left:0;background:var(--sb2);border-right:1px solid var(--sbr);z-index:4}
+.tl-zone-ticks{flex:1;position:relative}
+.now-line{position:absolute;top:0;bottom:0;width:4px;background:rgba(255,60,60,0.9);z-index:10;pointer-events:none}
+.tl-row{display:flex;flex:1;min-height:36px;border-bottom:1px solid var(--sbr2)}
+.row-lbl{width:120px;min-width:120px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:20px;font-weight:700;color:var(--st2);border-right:1px solid var(--sbr);flex-shrink:0;position:sticky;left:0;background:var(--sb2);z-index:2}
+.zone-lbl{font-size:16px;color:var(--sz);text-align:right;line-height:1.3;word-break:break-word}
+.row-cells{flex:1;position:relative;overflow:hidden;align-self:stretch}
+.fb{position:absolute;top:8%;height:82%;border-radius:5px;display:flex;align-items:center;padding:0 10px;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:2px solid transparent;min-width:6px}
+.mv-landing{background:linear-gradient(to right,#ddeeff,#1565C0);color:#0a2a5a;border-color:#4a90d9}
+.mv-takeoff{background:linear-gradient(to right,#1565C0,#ddeeff);color:#0a2a5a;border-color:#4a90d9}
+.mv-both{background:#1565C0;color:#e8f4ff;border-color:#4a90d9}
+.phase-startup{background:#5a1a3a;color:#ffb6d9;border-color:#ff69b4}
+.phase-transit{background:#3a1060;color:#d7b8f3;border-color:#9b59b6}
+.phase-ok{background:#1a4a1a;color:#7fd4a0;border-color:#27ae60}
+.phase-warn{background:#4a3500;color:#f9e16a;border-color:#f1c40f}
+.phase-alert{background:#4a1010;color:#f5a0a0;border-color:#c0392b}
+.phase-over{background:#111;color:#fff;border-color:#fff}
+.phase-retour{background:#3a1f0a;color:#d4a06a;border-color:#8B4513}
+.phase-close{opacity:.45}
+.empty-msg{padding:24px;color:var(--st2);text-align:center;font-size:28px}
+.map-area{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--sb)}
+#tokensLayer{position:absolute;inset:0;z-index:5;pointer-events:none}
+.tok{position:absolute;transform:translate(-50%,-50%);padding:4px 10px;border-radius:4px;font-size:13px;font-weight:900;white-space:nowrap;border:2px solid transparent;cursor:default;user-select:none}
+.sym-tok{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:default;animation:blink-fast 1s infinite}
+.sym-lbl{font-size:9px;background:rgba(0,0,0,.85);color:#fff;padding:1px 5px;border-radius:2px;white-space:nowrap;margin-top:2px;font-weight:700}
+@keyframes blink-fast{0%,100%{opacity:1}50%{opacity:0.5}}
+.sc-wrap{flex:1;display:flex;flex-wrap:wrap;gap:16px;padding:20px;overflow-y:auto;align-content:flex-start}
+.sc{padding:18px 24px;border-radius:10px;min-width:280px;flex:1;max-width:480px}
+.sc-name{font-size:44px;font-weight:900;letter-spacing:2px;margin-bottom:6px}
+.sc-zone{font-size:30px;color:var(--st2);margin-bottom:6px}
+.sc-phase{font-size:26px;font-weight:700}
+@media(max-width:1024px){
+  .hdr-l .title{font-size:36px;letter-spacing:3px}
+  .hdr-l .date{font-size:18px}
+  .hdr-r{font-size:20px}
+  .stitle{font-size:15px;padding:5px 12px}
+  .th{font-size:12px}
+  .row-lbl{width:80px;min-width:80px;font-size:14px}
+  .zone-lbl{font-size:11px}
+  .tl-axis{margin-left:80px}
+  .tl-zone-corner{width:80px;min-width:80px}
+  .tl-zones-inner{min-width:600px}
+  .fb{font-size:13px;padding:0 6px}
+  .sc-name{font-size:28px}
+  .sc-zone{font-size:20px}
+  .sc-phase{font-size:18px}
+  .sc{min-width:200px;padding:12px 16px}
+}
+@media(max-width:600px){
+  .hdr-l .title{font-size:22px;letter-spacing:1px}
+  .hdr-l .date{font-size:12px}
+  .hdr-r{font-size:13px}
+  .stitle{font-size:11px;padding:4px 8px;letter-spacing:1px}
+  .th{font-size:9px}
+  .row-lbl{width:52px;min-width:52px;font-size:9px;padding-right:4px}
+  .zone-lbl{font-size:8px}
+  .tl-axis{margin-left:52px}
+  .tl-zone-corner{width:52px;min-width:52px}
+  .tl-zones-inner{min-width:400px}
+  .tl-row{min-height:52px}
+  .fb{font-size:9px;padding:0 3px}
+  .sc-name{font-size:20px}
+  .sc-zone{font-size:13px}
+  .sc-phase{font-size:12px}
+  .sc{min-width:140px;padding:8px 10px}
+  .sc-wrap{gap:8px;padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-l"><div class="title">CVM OPS</div><div class="date">MERCREDI 13 MAI 2026</div></div>
+  <div class="hdr-r">MAJ 14:17:54<br><span id="clk"></span></div>
+</div>
+<div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
+
+<div class="slide" id="s0">
+  <div class="stitle">TIMELINE</div>
+  <div class="tl-axis" style="margin-left:0;height:34px"><div class="th" style="left:0.00%">00</div><div class="th" style="left:4.17%">01</div><div class="th" style="left:8.33%">02</div><div class="th" style="left:12.50%">03</div><div class="th" style="left:16.67%">04</div><div class="th" style="left:20.83%">05</div><div class="th" style="left:25.00%">06</div><div class="th" style="left:29.17%">07</div><div class="th" style="left:33.33%">08</div><div class="th" style="left:37.50%">09</div><div class="th" style="left:41.67%">10</div><div class="th" style="left:45.83%">11</div><div class="th" style="left:50.00%">12</div><div class="th" style="left:54.17%">13</div><div class="th" style="left:58.33%">14</div><div class="th" style="left:62.50%">15</div><div class="th" style="left:66.67%">16</div><div class="th" style="left:70.83%">17</div><div class="th" style="left:75.00%">18</div><div class="th" style="left:79.17%">19</div><div class="th" style="left:83.33%">20</div><div class="th" style="left:87.50%">21</div><div class="th" style="left:91.67%">22</div><div class="th" style="left:95.83%">23</div><div class="th" style="left:100.00%">24</div></div>
+  <div class="tl-body"><div class="now-line" id="nl0"></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div><div class="tl-row"><div class="row-cells"></div></div></div>
+</div>
+
+<div class="slide" id="s1">
+  <div class="stitle">OCCUPATION DES ZONES</div>
+  <div class="tl-body tl-zones"><div class="tl-zones-inner"><div class="tl-zone-hdr"><div class="tl-zone-corner"></div><div class="tl-zone-ticks"><div class="th" style="left:0.00%">00</div><div class="th" style="left:4.17%">01</div><div class="th" style="left:8.33%">02</div><div class="th" style="left:12.50%">03</div><div class="th" style="left:16.67%">04</div><div class="th" style="left:20.83%">05</div><div class="th" style="left:25.00%">06</div><div class="th" style="left:29.17%">07</div><div class="th" style="left:33.33%">08</div><div class="th" style="left:37.50%">09</div><div class="th" style="left:41.67%">10</div><div class="th" style="left:45.83%">11</div><div class="th" style="left:50.00%">12</div><div class="th" style="left:54.17%">13</div><div class="th" style="left:58.33%">14</div><div class="th" style="left:62.50%">15</div><div class="th" style="left:66.67%">16</div><div class="th" style="left:70.83%">17</div><div class="th" style="left:75.00%">18</div><div class="th" style="left:79.17%">19</div><div class="th" style="left:83.33%">20</div><div class="th" style="left:87.50%">21</div><div class="th" style="left:91.67%">22</div><div class="th" style="left:95.83%">23</div><div class="th" style="left:100.00%">24</div></div></div><div class="now-line" id="nl1"></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 1</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 2</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 3</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 4</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 5</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 6</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 7</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 8</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 9</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 10</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 11</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 12</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA VT</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFNQ</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFYS</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">MULTI-ZONES</div><div class="row-cells"></div></div></div></div>
+</div>
+
+<div class="slide" id="s2">
+  <div class="stitle">CARTE</div>
+  <div class="map-area" id="mapArea">
+    <img id="mapImg" src="./carte_cvm.jpg" onload="renderTokens()" style="max-width:100%;max-height:100%;object-fit:contain;display:block;pointer-events:none;user-select:none">
+    <div id="tokensLayer"></div>
+  </div>
+</div>
+
+<script>
+let cur=0;
+const ss=[document.getElementById('s0'),document.getElementById('s1'),document.getElementById('s2')];
+const ds=[document.getElementById('d0'),document.getElementById('d1'),document.getElementById('d2')];
+function show(i){ss.forEach((s,j)=>{if(s)s.classList.toggle('on',j===i);if(ds[j])ds[j].classList.toggle('on',j===i)});cur=i;if(i===2)setTimeout(renderTokens,50);}
+show(0);
+setInterval(()=>show((cur+1)%ss.length),10000);
+setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('fr-FR');},1000);
+setTimeout(()=>location.reload(true),75000);
+
+const RANGE_MIN=0, RANGE_DUR=1440;
+function updateNowLines(){
+  const n=new Date();
+  const pct=(n.getHours()*60+n.getMinutes()-RANGE_MIN)/RANGE_DUR*100;
+  [['nl0',0],['nl1',120]].forEach(([id,lw])=>{
+    const l=document.getElementById(id);if(!l)return;
+    if(pct<0||pct>100){l.style.display='none';return;}
+    l.style.display='';
+    l.style.left=lw===0?pct.toFixed(3)+'%':'calc('+pct.toFixed(3)+'% + '+(120*(100-pct)/100).toFixed(1)+'px)';
+  });
+}
+updateNowLines();
+setInterval(updateNowLines,30000);
+
+const AREA_POS=Object.assign({
+  'AREA 1':{x:52,y:28},'AREA 2':{x:30,y:42},'AREA 3':{x:48,y:38},'AREA 4':{x:10,y:47},
+  'AREA 5':{x:73,y:21},'AREA 6':{x:40,y:74},'AREA 7':{x:52,y:64},'AREA 8':{x:72,y:54},
+  'AREA 9':{x:82,y:62},'AREA 10':{x:22,y:20},'AREA 11':{x:9,y:17},'AREA 12':{x:46,y:11},
+  'LOCAL LFYS':{x:70,y:42},'LOCAL LFNQ':{x:70,y:50},'AREA VT':{x:70,y:46}
+},{"AREA 1":{"x":51.098901098901095,"y":26.465022866406944},"AREA 2":{"x":40.65934065934066,"y":35.31976673845186},"AREA 3":{"x":31.648351648351646,"y":46.0386672151378},"AREA 4":{"x":12.197802197802197,"y":47.74747743605875},"AREA 5":{"x":79.34065934065934,"y":18.853050064122726},"AREA 6":{"x":52.307692307692314,"y":86.42872698236022},"AREA 7":{"x":62.1978021978022,"y":76.64190480799478},"AREA 8":{"x":71.42857142857143,"y":66.54438986618918},"AREA 9":{"x":84.28571428571429,"y":62.505383889466934},"AREA 10":{"x":27.582417582417584,"y":19.47443559900307},"AREA 11":{"x":13.296703296703297,"y":16.367507924601345},"AREA 12":{"x":44.065934065934066,"y":11.551770029278675},"AREA VT":{"x":57.58241758241758,"y":55.0487574709028},"LOCAL LFNQ":{"x":68.24175824175825,"y":38.73738718029375},"LOCAL LFYS":{"x":50.76923076923077,"y":69.02993200571056}});
+const mapFlights=[];
+
+function getImgBounds(){
+  const img=document.getElementById('mapImg');
+  const c=document.getElementById('mapArea');
+  if(!img||!img.naturalWidth)return{left:0,top:0,width:c.offsetWidth,height:c.offsetHeight};
+  const iAR=img.naturalWidth/img.naturalHeight,cAR=c.offsetWidth/c.offsetHeight;
+  let rW,rH;
+  if(iAR>cAR){rW=c.offsetWidth;rH=c.offsetWidth/iAR;}else{rH=c.offsetHeight;rW=c.offsetHeight*iAR;}
+  return{left:(c.offsetWidth-rW)/2,top:(c.offsetHeight-rH)/2,width:rW,height:rH};
+}
+
+function renderTokens(){
+  const layer=document.getElementById('tokensLayer');
+  if(!layer)return;
+  layer.innerHTML='';
+  const b=getImgBounds();
+  mapFlights.forEach(f=>{
+    let zone,xOff=0,yOff=0;
+    if(f.transit_to_zone&&f.transit_to_zone!==''){zone=f.transit_to_zone;yOff=-30;}
+    else if(f.zone_chrono_start&&f.zone_chrono_start!==''){zone=f.current_area||f.area;yOff=30;}
+    else if(f.current_area&&f.current_area!==''){zone=f.current_area;xOff=38;}
+    else{zone=f.area;}
+    const pos=AREA_POS[zone];if(!pos)return;
+    const px=b.left+pos.x/100*b.width+xOff;
+    const py=b.top+pos.y/100*b.height+yOff;
+    let bg,bd,col;
+    if(f.status==='startup'){bg='#5a1a3a';bd='#ff69b4';col='#ffb6d9';}
+    else if(f.transit_to_zone&&f.transit_to_zone!==''){bg='#3a1060';bd='#9b59b6';col='#d7b8f3';}
+    else if(f.zone_chrono_start&&f.zone_chrono_start!==''){
+      const el=Math.floor((Date.now()-new Date(f.zone_chrono_start.includes('T')?f.zone_chrono_start:f.zone_chrono_start.replace(' ','T')).getTime())/60000);
+      if(el>=40){bg='#111';bd='#fff';col='#fff';}
+      else if(el>=30){bg='#4a1010';bd='#c0392b';col='#f5a0a0';}
+      else if(el>=25){bg='#4a3500';bd='#f1c40f';col='#f9e16a';}
+      else{bg='#1a4a1a';bd='#27ae60';col='#7fd4a0';}
+    }
+    else if(f.current_area&&f.current_area!==''){bg='#3a1f0a';bd='#8B4513';col='#d4a06a';}
+    else{bg='#1a3a6a';bd='#4a90d9';col='#a8d4f5';}
+    const label=[f.callsign,f.flight_number].filter(Boolean).join('/')||f.aircraft_type||'?';
+    const div=document.createElement('div');
+    div.className='tok';
+    div.style.left=px+'px';div.style.top=py+'px';
+    div.style.background=bg;div.style.borderColor=bd;div.style.color=col;
+    div.textContent=label;
+    layer.appendChild(div);
+  });
+  // Symboles carte
+  const mapSymbols=[{"x":24.822861485504816,"y":49.14132237933486,"shape":"circle-bar","color":"#c0392b","label":"GYPAHETE"},{"x":41.488410559020096,"y":45.29899676119757,"shape":"circle-bar","color":"#c0392b","label":"AIGLE"}];
+  function _svgEl(p,tag,attrs,txt){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(txt!==undefined)el.textContent=txt;p.appendChild(el);}
+  function _mkSign(shape,color){const NS='http://www.w3.org/2000/svg';const svg=document.createElementNS(NS,'svg');svg.setAttribute('width','34');svg.setAttribute('height','34');svg.setAttribute('viewBox','0 0 34 34');svg.style.cssText='display:block;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.9))';const c=color||'#f1c40f';if(shape==='triangle'){_svgEl(svg,'polygon',{points:'17,2 32,30 2,30',fill:c,stroke:'rgba(0,0,0,0.45)','stroke-width':'1.5'});_svgEl(svg,'text',{x:'17',y:'26','text-anchor':'middle','font-size':'14','font-weight':'900',fill:'rgba(0,0,0,0.6)'},'!');}else if(shape==='circle-bar'){_svgEl(svg,'circle',{cx:'17',cy:'17',r:'15',fill:'white',stroke:c,'stroke-width':'3.5'});_svgEl(svg,'rect',{x:'4',y:'13',width:'26',height:'8',fill:c,rx:'2'});}else if(shape==='square'){_svgEl(svg,'rect',{x:'2',y:'2',width:'30',height:'30',rx:'4',fill:c});_svgEl(svg,'text',{x:'17',y:'25','text-anchor':'middle','font-size':'18','font-weight':'900','font-style':'italic',fill:'white'},'i');}else if(shape==='diamond'){_svgEl(svg,'polygon',{points:'17,2 32,17 17,32 2,17',fill:'white',stroke:c,'stroke-width':'3'});_svgEl(svg,'text',{x:'17',y:'23','text-anchor':'middle','font-size':'14','font-weight':'900',fill:c},'!');}else{_svgEl(svg,'polygon',{points:'10,2 24,2 32,10 32,24 24,32 10,32 2,24 2,10',fill:c});_svgEl(svg,'text',{x:'17',y:'21','text-anchor':'middle','font-size':'7.5','font-weight':'900',fill:'white'},'STOP');}return svg;}
+  mapSymbols.forEach(sym=>{
+    const px=b.left+sym.x/100*b.width, py=b.top+sym.y/100*b.height;
+    const tok=document.createElement('div'); tok.className='sym-tok'; tok.style.left=px+'px'; tok.style.top=py+'px';
+    tok.appendChild(_mkSign(sym.shape,sym.color));
+    if(sym.label){const lbl=document.createElement('div');lbl.className='sym-lbl';lbl.textContent=sym.label;tok.appendChild(lbl);}
+    layer.appendChild(tok);
+  });
+}
+window.addEventListener('resize',renderTokens);
+</script>
+</body>
+</html>
