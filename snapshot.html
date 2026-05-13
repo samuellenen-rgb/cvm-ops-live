@@ -23,7 +23,6 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 .th{position:absolute;font-size:16px;color:var(--sa);transform:translateX(-50%);top:7px;font-weight:700}
 .tl-body{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
 .now-line{position:absolute;top:0;bottom:0;width:4px;background:rgba(255,60,60,0.9);z-index:10;pointer-events:none}
-.now-line::before{content:'▼';position:absolute;top:0;left:-12px;color:rgba(255,60,60,0.95);font-size:24px;line-height:1}
 .tl-row{display:flex;flex:1;min-height:0;border-bottom:1px solid var(--sbr2)}
 .row-lbl{width:120px;min-width:120px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:20px;font-weight:700;color:var(--st2);border-right:1px solid var(--sbr);flex-shrink:0}
 .zone-lbl{font-size:16px;color:var(--sz);text-align:right;line-height:1.3;word-break:break-word}
@@ -88,7 +87,7 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 <body>
 <div class="hdr">
   <div class="hdr-l"><div class="title">CVM OPS</div><div class="date">MERCREDI 13 MAI 2026</div></div>
-  <div class="hdr-r">MAJ 08:18:41<br><span id="clk"></span></div>
+  <div class="hdr-r">MAJ 08:19:23<br><span id="clk"></span></div>
 </div>
 <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
 
@@ -120,7 +119,7 @@ function show(i){ss.forEach((s,j)=>{if(s)s.classList.toggle('on',j===i);if(ds[j]
 show(0);
 setInterval(()=>show((cur+1)%ss.length),10000);
 setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('fr-FR');},1000);
-setTimeout(()=>location.reload(true),90000);
+setTimeout(()=>location.reload(true),60000);
 
 const RANGE_MIN=0, RANGE_DUR=1440;
 function updateNowLines(){
