@@ -97,7 +97,7 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 <body>
 <div class="hdr">
   <div class="hdr-l"><div class="title">CVM OPS</div><div class="date">MERCREDI 13 MAI 2026</div></div>
-  <div class="hdr-r">MAJ 09:53:33<br><span id="clk"></span></div>
+  <div class="hdr-r">MAJ 09:54:05<br><span id="clk"></span></div>
 </div>
 <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
 
@@ -128,7 +128,7 @@ function show(i){ss.forEach((s,j)=>{if(s)s.classList.toggle('on',j===i);if(ds[j]
 show(0);
 setInterval(()=>show((cur+1)%ss.length),10000);
 setInterval(()=>{document.getElementById('clk').textContent=new Date().toLocaleTimeString('fr-FR');},1000);
-setTimeout(()=>location.reload(true),120000);
+setTimeout(()=>location.reload(true),75000);
 
 const RANGE_MIN=0, RANGE_DUR=1440;
 function updateNowLines(){
