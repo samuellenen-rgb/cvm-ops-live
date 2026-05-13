@@ -22,6 +22,11 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 .tl-axis{position:relative;height:34px;background:var(--sb2);margin-left:120px;flex-shrink:0;border-bottom:1px solid var(--sbr)}
 .th{position:absolute;font-size:16px;color:var(--sa);transform:translateX(-50%);top:7px;font-weight:700}
 .tl-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;display:flex;flex-direction:column}
+.tl-zones{overflow:auto}
+.tl-zones-inner{min-width:800px;display:flex;flex-direction:column;flex:1;position:relative}
+.tl-zone-hdr{position:sticky;top:0;z-index:3;display:flex;background:var(--sb2);border-bottom:1px solid var(--sbr);flex-shrink:0;height:34px}
+.tl-zone-corner{width:120px;min-width:120px;flex-shrink:0;position:sticky;left:0;background:var(--sb2);border-right:1px solid var(--sbr);z-index:4}
+.tl-zone-ticks{flex:1;position:relative}
 .now-line{position:absolute;top:0;bottom:0;width:4px;background:rgba(255,60,60,0.9);z-index:10;pointer-events:none}
 .tl-row{display:flex;flex:1;min-height:60px;border-bottom:1px solid var(--sbr2)}
 .row-lbl{width:120px;min-width:120px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:20px;font-weight:700;color:var(--st2);border-right:1px solid var(--sbr);flex-shrink:0;position:sticky;left:0;background:var(--sb2);z-index:2}
@@ -60,6 +65,8 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
   .row-lbl{width:80px;min-width:80px;font-size:14px}
   .zone-lbl{font-size:11px}
   .tl-axis{margin-left:80px}
+  .tl-zone-corner{width:80px;min-width:80px}
+  .tl-zones-inner{min-width:600px}
   .fb{font-size:13px;padding:0 6px}
   .sc-name{font-size:28px}
   .sc-zone{font-size:20px}
@@ -75,6 +82,8 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
   .row-lbl{width:52px;min-width:52px;font-size:9px;padding-right:4px}
   .zone-lbl{font-size:8px}
   .tl-axis{margin-left:52px}
+  .tl-zone-corner{width:52px;min-width:52px}
+  .tl-zones-inner{min-width:400px}
   .fb{font-size:9px;padding:0 3px}
   .sc-name{font-size:20px}
   .sc-zone{font-size:13px}
@@ -87,7 +96,7 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 <body>
 <div class="hdr">
   <div class="hdr-l"><div class="title">CVM OPS</div><div class="date">MERCREDI 13 MAI 2026</div></div>
-  <div class="hdr-r">MAJ 09:18:09<br><span id="clk"></span></div>
+  <div class="hdr-r">MAJ 09:18:34<br><span id="clk"></span></div>
 </div>
 <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div></div>
 
@@ -99,8 +108,7 @@ body{background:var(--sb);color:var(--st);font-family:'Courier New',monospace;he
 
 <div class="slide" id="s1">
   <div class="stitle">OCCUPATION DES ZONES</div>
-  <div class="tl-axis"><div class="th" style="left:0.00%">00</div><div class="th" style="left:4.17%">01</div><div class="th" style="left:8.33%">02</div><div class="th" style="left:12.50%">03</div><div class="th" style="left:16.67%">04</div><div class="th" style="left:20.83%">05</div><div class="th" style="left:25.00%">06</div><div class="th" style="left:29.17%">07</div><div class="th" style="left:33.33%">08</div><div class="th" style="left:37.50%">09</div><div class="th" style="left:41.67%">10</div><div class="th" style="left:45.83%">11</div><div class="th" style="left:50.00%">12</div><div class="th" style="left:54.17%">13</div><div class="th" style="left:58.33%">14</div><div class="th" style="left:62.50%">15</div><div class="th" style="left:66.67%">16</div><div class="th" style="left:70.83%">17</div><div class="th" style="left:75.00%">18</div><div class="th" style="left:79.17%">19</div><div class="th" style="left:83.33%">20</div><div class="th" style="left:87.50%">21</div><div class="th" style="left:91.67%">22</div><div class="th" style="left:95.83%">23</div><div class="th" style="left:100.00%">24</div></div>
-  <div class="tl-body"><div class="now-line" id="nl1"></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 1</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 2</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 3</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 4</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 5</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 6</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 7</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 8</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 9</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 10</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 11</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 12</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA VT</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFNQ</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFYS</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">MULTI-ZONES</div><div class="row-cells"></div></div></div>
+  <div class="tl-body tl-zones"><div class="tl-zones-inner"><div class="tl-zone-hdr"><div class="tl-zone-corner"></div><div class="tl-zone-ticks"><div class="th" style="left:0.00%">00</div><div class="th" style="left:4.17%">01</div><div class="th" style="left:8.33%">02</div><div class="th" style="left:12.50%">03</div><div class="th" style="left:16.67%">04</div><div class="th" style="left:20.83%">05</div><div class="th" style="left:25.00%">06</div><div class="th" style="left:29.17%">07</div><div class="th" style="left:33.33%">08</div><div class="th" style="left:37.50%">09</div><div class="th" style="left:41.67%">10</div><div class="th" style="left:45.83%">11</div><div class="th" style="left:50.00%">12</div><div class="th" style="left:54.17%">13</div><div class="th" style="left:58.33%">14</div><div class="th" style="left:62.50%">15</div><div class="th" style="left:66.67%">16</div><div class="th" style="left:70.83%">17</div><div class="th" style="left:75.00%">18</div><div class="th" style="left:79.17%">19</div><div class="th" style="left:83.33%">20</div><div class="th" style="left:87.50%">21</div><div class="th" style="left:91.67%">22</div><div class="th" style="left:95.83%">23</div><div class="th" style="left:100.00%">24</div></div></div><div class="now-line" id="nl1"></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 1</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 2</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 3</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 4</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 5</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 6</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 7</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 8</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 9</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 10</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 11</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA 12</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">AREA VT</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFNQ</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">LOCAL LFYS</div><div class="row-cells"></div></div><div class="tl-row"><div class="row-lbl zone-lbl">MULTI-ZONES</div><div class="row-cells"></div></div></div></div>
 </div>
 
 <div class="slide" id="s2">
